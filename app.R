@@ -26,10 +26,10 @@ importPackage()
 
 authenticateAPI <- function() {
     # Key auth Twitter API
-    consumer.api_key <- "VW28ccYNAPz0Dw542lvhE34zS"
-    consumer.api_secret_key <- "pymeOXJ6GSaJitnIO4GtqQRcUyKJiQ7qJTVexoUVKyL6eA56k6"
-    access.token <- "2459470238-ydCTCGxtR8PXWGrUDIlDnKT7dQkR24H2JNZ9C64"
-    access.token_secret <- "B8IrpiquS5zqaZsZ4IDOGjSvNqRvoT3Wkn5NP6sPcHkU8"
+    consumer.api_key <- "fill your api key"
+    consumer.api_secret_key <- "fill your api secret key"
+    access.token <- "fill your access token"
+    access.token_secret <- "fill your token secret"
     
     # Start authentication with OAuth
     setup_twitter_oauth(consumer.api_key, consumer.api_secret_key, access.token, access.token_secret)
