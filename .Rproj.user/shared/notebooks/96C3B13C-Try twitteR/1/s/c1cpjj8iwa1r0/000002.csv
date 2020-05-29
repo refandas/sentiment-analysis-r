@@ -1,0 +1,40 @@
+"0","library(tm)"
+"2","Loading required package: NLP
+"
+"2","
+Attaching package: ‘NLP’
+
+"
+"2","The following object is masked from ‘package:ggplot2’:
+
+    annotate
+
+"
+"0","get.dtm <- function(text.col, id.col, input.df, weighting) {"
+"0","    "
+"0","    # Menghilangkan emoticon"
+"0","    input.df$text <- gsub(""[^\x01-\x7F]"", """", input.df$text)"
+"0","    "
+"0","    # Preprocessing kata"
+"0","    corpus <- VCorpus(DataframeSource(input.df))"
+"0","    corpus <- tm_map(corpus, removePunctuation)"
+"0","    corpus <- tm_map(corpus, removeNumbers)"
+"0","    corpus <- tm_map(corpus, stripWhitespace)"
+"0","    corpus <- tm_map(corpus, removeWords, stopwords(""english""))"
+"0","    corpus <- tm_map(corpus, content_transformer(tolower))"
+"0","    "
+"0","    dtm <- DocumentTermMatrix(corpus, control = list(weighting = weighting))"
+"0","    return(dtm)"
+"0","}"
+"0",""
+"0","colnames(tweet.final)[4] <- ""doc_id"""
+"0","dtm <- get.dtm('text', 'id', tweet.final, ""weightTfIdf"")"
+"0","dtm"
+"1","<<DocumentTermMatrix (documents: 898, terms: 2571)>>
+"
+"1","Non-/sparse entries: 10669/2298089
+"
+"1","Sparsity           : 100%
+"
+"1","Maximal term length: 26
+"

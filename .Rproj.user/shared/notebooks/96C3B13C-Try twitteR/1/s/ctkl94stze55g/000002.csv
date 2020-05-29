@@ -1,0 +1,2 @@
+"0","tweet.df$polarity <- sentiment.score$sentiment"
+"0","tweet.final <- tweet.df[, c('text', 'polarity')]"

@@ -1,0 +1,3 @@
+"0","# Menghilangkan tweet yang berupa retweet"
+"0","# tweet.df <- tweet.df[tweet.df$isRetweet == FALSE, ]"
+"0","tweet.df <- data.frame(tweet.df['text'])"

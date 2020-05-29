@@ -1,0 +1,3 @@
+"0","# Scrapping tweet"
+"0","tweet.results <- searchTwitter(""covid health"", n = 1000, lang = ""en"")"
+"0","tweet.df <- twListToDF(tweet.results)"

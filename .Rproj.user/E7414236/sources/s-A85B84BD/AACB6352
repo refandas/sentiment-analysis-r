@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1590726536663.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "AACB6352",
+    "lastKnownWriteTime" : 1590732011,
+    "last_content_update" : 1590732011904,
+    "path" : "~/Documents/KULIAH/Semester 6/Praktikum Data Science/Sentiment Analysis R/app.R",
+    "project_path" : "app.R",
+    "properties" : {
+        "cursorPosition" : "197,25",
+        "marks" : "<:66,41\n>:67,0",
+        "scrollLine" : "188"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

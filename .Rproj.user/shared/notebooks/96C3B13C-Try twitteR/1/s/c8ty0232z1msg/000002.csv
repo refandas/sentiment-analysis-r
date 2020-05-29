@@ -1,0 +1,12 @@
+"0","# TF-IDF"
+"0","dtm <- removeSparseTerms(dtm, 0.98)"
+"0","dtm.mat <- as.matrix(dtm)"
+"0","dtm"
+"1","<<DocumentTermMatrix (documents: 898, terms: 119)>>
+"
+"1","Non-/sparse entries: 4485/102377
+"
+"1","Sparsity           : 96%
+"
+"1","Maximal term length: 15
+"

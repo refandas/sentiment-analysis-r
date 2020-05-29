@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1590731197336.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "798F84C6",
+    "lastKnownWriteTime" : 1590708779,
+    "last_content_update" : 1590708779,
+    "path" : "~/Documents/PROGRAMMING/Praktikum-DS/Twitter-Sentiment-Analysis-using-R-Shiny-WebApp-master/ui.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "100,23",
+        "scrollLine" : "45"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

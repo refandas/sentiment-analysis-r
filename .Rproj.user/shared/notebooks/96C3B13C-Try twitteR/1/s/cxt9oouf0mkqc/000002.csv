@@ -1,0 +1,7 @@
+"0","library(sentimentr, quietly = TRUE)"
+"2","Registered S3 method overwritten by 'data.table':
+  method           from
+  print.data.table     
+"
+"0","sentiment.score <- sentiment(tweet.df$text)"
+"0","head(sentiment.score)"

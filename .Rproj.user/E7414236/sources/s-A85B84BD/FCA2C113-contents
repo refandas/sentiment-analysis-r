@@ -1,0 +1,208 @@
+---
+title: "Try twitteR"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(twitteR, quietly = TRUE)
+```
+
+```{r}
+# Autentikasi API Twitter
+consumer.api_key <- "VW28ccYNAPz0Dw542lvhE34zS"
+consumer.api_secret_key <- "pymeOXJ6GSaJitnIO4GtqQRcUyKJiQ7qJTVexoUVKyL6eA56k6"
+access.token <- "2459470238-ydCTCGxtR8PXWGrUDIlDnKT7dQkR24H2JNZ9C64"
+access.token_secret <- "B8IrpiquS5zqaZsZ4IDOGjSvNqRvoT3Wkn5NP6sPcHkU8"
+
+setup_twitter_oauth(consumer.api_key, consumer.api_secret_key, access.token, access.token_secret)
+```
+
+```{r}
+# Scrapping tweet
+tweet.results <- searchTwitter("covid health", n = 1000, lang = "en")
+tweet.df <- twListToDF(tweet.results)
+```
+
+```{r}
+# Menghilangkan tweet yang berupa retweet
+# tweet.df <- tweet.df[tweet.df$isRetweet == FALSE, ]
+tweet.df <- data.frame(tweet.df['text'])
+```
+
+```{r}
+# Menghilangkan karakter dalam tweet sehingga yang tersisa hanya teks saja
+library(stringr)
+tweet.df$text = str_replace_all(tweet.df$text, "[\\.\\,\\;]+", " ")
+tweet.df$text = str_replace_all(tweet.df$text, "http\\w+", "")
+tweet.df$text = str_replace_all(tweet.df$text, "@\\w+", " ")
+tweet.df$text = str_replace_all(tweet.df$text, "[[:punct:]]", " ")
+tweet.df$text = str_replace_all(tweet.df$text, "[[:digit:]]", " ")
+tweet.df$text = str_replace_all(tweet.df$text, "^ ", " ")
+tweet.df$text = str_replace_all(tweet.df$text, "[<].*[>]", " ")
+```
+
+```{r}
+library(sentimentr, quietly = TRUE)
+sentiment.score <- sentiment(tweet.df$text)
+head(sentiment.score)
+```
+
+```{r}
+library(dplyr, quietly = TRUE)
+sentiment.score <- sentiment.score %>% group_by(element_id) %>% summarise(sentiment = mean(sentiment))
+head(sentiment.score)
+```
+
+```{r}
+tweet.df$polarity <- sentiment.score$sentiment
+tweet.final <- tweet.df[, c('text', 'polarity')]
+```
+
+```{r}
+tweet.final <- tweet.final[tweet.final$polarity != 0, ]
+tweet.final$sentiment <- ifelse(tweet.final$polarity < 0, "Negative", "Positive")
+tweet.final$sentiment <- as.factor(tweet.final$sentiment)
+table(tweet.final$sentiment)
+```
+
+```{r}
+# Membuat class menjadi balance, sehingga diharapkan dapat menghasilkan hasil klasifikasi lebih baik
+library(caret, quietly = TRUE)
+tweet.balanced <- upSample(x = tweet.final$text, y = tweet.final$sentiment)
+names(tweet.balanced) <- c('text', 'sentiment')
+table(tweet.balanced$sentiment)
+```
+
+```{r}
+tweet.final$id <- seq(1, nrow(tweet.final))
+```
+
+```{r}
+library(tm)
+get.dtm <- function(text.col, id.col, input.df, weighting) {
+    
+    # Menghilangkan emoticon
+    input.df$text <- gsub("[^\x01-\x7F]", "", input.df$text)
+    
+    # Preprocessing kata
+    corpus <- VCorpus(DataframeSource(input.df))
+    corpus <- tm_map(corpus, removePunctuation)
+    corpus <- tm_map(corpus, removeNumbers)
+    corpus <- tm_map(corpus, stripWhitespace)
+    corpus <- tm_map(corpus, removeWords, stopwords("english"))
+    corpus <- tm_map(corpus, content_transformer(tolower))
+    
+    dtm <- DocumentTermMatrix(corpus, control = list(weighting = weighting))
+    return(dtm)
+}
+
+colnames(tweet.final)[4] <- "doc_id"
+dtm <- get.dtm('text', 'id', tweet.final, "weightTfIdf")
+dtm
+```
+
+```{r}
+# TF-IDF
+dtm <- removeSparseTerms(dtm, 0.98)
+dtm.mat <- as.matrix(dtm)
+dtm
+```
+
+```{r}
+# Memisahkan tweet positif dan negatif
+dtm.pos <- get.dtm('text', 'id', tweet.final[tweet.final$sentiment == 'Positive',], "weightBin")
+dtm.neg <- get.dtm('text', 'id', tweet.final[tweet.final$sentiment == 'Negative',], "weightBin")
+
+dtm.pos.mat <- as.matrix(dtm.pos)
+dtm.neg.mat <- as.matrix(dtm.neg)
+
+# Mencari document frequency
+pos.words.df <- colSums(dtm.pos.mat)
+neg.words.df <- colSums(dtm.neg.mat)
+
+# Mendapatkan seluruh kata unik dan ID dari dokumen
+tot.features <- colnames(dtm.mat)
+doc.ids <- rownames(dtm.mat)
+
+# Menghitung delta TF-IDF
+c.dtm.mat <- dtm.mat
+
+for (i in 1:length(tot.features)) {
+    for (j in 1:length(doc.ids)) {
+        # Banyaknya term muncul dalam dokumen
+        ctd <- dtm.mat[doc.ids[j], tot.features[i]]
+        
+        # Banyaknya dokumen positif dalam term
+        pt <- pos.words.df[tot.features[i]]
+        
+        # Banyaknya dokumen ngeatif dalam term
+        nt <- neg.words.df[tot.features[i]]
+        
+        score <- ctd * log(nt / pt)
+        if (is.na(score)) {
+            score <- 0
+        }
+        
+        c.dtm.mat[doc.ids[j], tot.features[i]] <- score
+    }
+}
+```
+
+
+```{r}
+# klasifikasi menggunakan Naive Bayes
+library(naivebayes)
+
+model <- naive_bayes(x = dtm.mat, y = tweet.final$sentiment, usekernel = TRUE)
+
+# prediksi menggunakan model
+preds <- predict(model, newdata = dtm.mat, type = "class")
+print(model$prior[['Negative']])
+
+# library(caret)
+cm <- confusionMatrix(preds, tweet.final$sentiment)
+cm$overall['Accuracy']
+```
+
+```{r}
+head(tweet.final$text)  # tweet
+head(tweet.final$sentiment)  # sentiment dari tweet
+head(pos.words.df)  # banyak kata positif
+head(neg.words.df)  # banyak kata negatif
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
